@@ -12,9 +12,10 @@ public class PriceController {
 
   @RequestMapping("${mvc.getPricesPath}")
   public PriceHistory processPriceRequest (@RequestParam(value="stock", defaultValue="ZZZZ") String symbol,
-                                                  @RequestParam(value="days", defaultValue = "0") int days) {
-
+                                           @RequestParam(value="days", defaultValue = "0") int days) {
     AlphaVantageService avs = new AlphaVantageService();
-    return avs.getPrices("aapl", OutputSize.Compact);
+    PriceHistory history = avs.getPrices(symbol, days > 100 ? OutputSize.Full : OutputSize.Compact);
+    history.keepRelevantData(days);
+    return history;
   }
 }

@@ -21,14 +21,16 @@ public class PriceHistory {
 
   public PriceHistory(String json) {
     Type listType = new TypeToken<List<PriceDaily>>(){}.getType();
-    Gson metaGson = new GsonBuilder()
+    Gson gson = new GsonBuilder()
         .registerTypeAdapter(PriceMetadata.class, new MetadataDeserializer())
-        .create();
-    Gson priceGson = new GsonBuilder()
         .registerTypeAdapter(listType, new PriceDailyDeserializer())
         .create();
 
-    metadata = metaGson.fromJson(json, PriceMetadata.class);
-    dailyPrices = priceGson.fromJson(json, listType);
+    metadata = gson.fromJson(json, PriceMetadata.class);
+    dailyPrices = gson.fromJson(json, listType);
+  }
+
+  public void keepRelevantData(int days) {
+    dailyPrices = dailyPrices.subList(0, days);
   }
 }
