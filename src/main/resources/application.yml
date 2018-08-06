@@ -16,11 +16,15 @@ spring:
 mvc:
    settleMissionPath: /settlementEngine
    getMissionPath: /settlementEngine/mission/
+   getPricesPath: /prices
    max-size-trace-payload: 50000
 jms:
    listener-concurrency: 1-5
    agreement-queue-json: sandbox.agreement
    agreement-queue-proto: sandbox.agreement.proto
+prices:
+   apiUrl: https://www.alphavantage.co/query?function=TIME_SERIES_DAILY
+   apiKey: XBLEFGBKUO1U4EYG
 ---
 # Test properties go here
 spring:
