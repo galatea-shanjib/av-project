@@ -2,6 +2,7 @@ package org.galatea.starter.domain.price;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.List;
@@ -19,15 +20,15 @@ public class PriceHistory {
   public PriceMetadata metadata;
   public List<PriceDaily> dailyPrices;
 
-  public PriceHistory(String json) {
-    Type listType = new TypeToken<List<PriceDaily>>(){}.getType();
+  public PriceHistory(JsonObject json) {
+    Type pricesListType = new TypeToken<List<PriceDaily>>(){}.getType();
     Gson gson = new GsonBuilder()
         .registerTypeAdapter(PriceMetadata.class, new MetadataDeserializer())
-        .registerTypeAdapter(listType, new PriceDailyDeserializer())
+        .registerTypeAdapter(pricesListType, new PriceDailyDeserializer())
         .create();
 
     metadata = gson.fromJson(json, PriceMetadata.class);
-    dailyPrices = gson.fromJson(json, listType);
+    dailyPrices = gson.fromJson(json, pricesListType);
   }
 
   public void keepRelevantData(int days) {

@@ -1,21 +1,23 @@
 package org.galatea.starter.entrypoint;
 
-import org.galatea.starter.domain.price.OutputSize;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.galatea.starter.domain.price.PriceHistory;
-import org.galatea.starter.service.AlphaVantageService;
+import org.galatea.starter.service.PricesService;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-public class PriceController {
+@RequiredArgsConstructor
+public class PriceController extends BaseRestController {
 
-  @RequestMapping("${mvc.getPricesPath}")
+  @NonNull
+  PricesService pricesService;
+
+  @RequestMapping("${webservice.getPricesPath}")
   public PriceHistory processPriceRequest (@RequestParam(value="stock", defaultValue="ZZZZ") String symbol,
                                            @RequestParam(value="days", defaultValue = "0") int days) {
-    AlphaVantageService avs = new AlphaVantageService();
-    PriceHistory history = avs.getPrices(symbol, days > 100 ? OutputSize.Full : OutputSize.Compact);
-    history.keepRelevantData(days);
-    return history;
+    return pricesService.getPrices(symbol, days);
   }
 }
