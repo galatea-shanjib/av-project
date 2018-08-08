@@ -17,7 +17,7 @@ public class PriceController extends BaseRestController {
 
   @RequestMapping("${webservice.getPricesPath}")
   public PriceHistory processPriceRequest (@RequestParam(value="stock", defaultValue="ZZZZ") String symbol,
-                                           @RequestParam(value="days", defaultValue = "0") int days) {
+                                           @RequestParam(value="days", defaultValue = "0") double days) {
     return pricesService.getPrices(symbol, days);
   }
 }

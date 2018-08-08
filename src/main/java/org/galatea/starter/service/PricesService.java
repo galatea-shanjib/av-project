@@ -1,6 +1,9 @@
 package org.galatea.starter.service;
 
 import com.google.gson.JsonObject;
+import com.mongodb.DB;
+import com.mongodb.DBCollection;
+import com.mongodb.MongoClient;
 import feign.Feign;
 import feign.Param;
 import feign.RequestLine;
@@ -26,15 +29,37 @@ public class PricesService{
   private String apiKey;
   @NonNull
   private String apiFunction;
+  private String mongoURL = "mongodb://localhost:27017";
 
-  public PriceHistory getPrices(String symbol, int days) {
+  public PriceHistory getPrices(String symbol, double days) {
     PriceHistory history = new PriceHistory();
-    if (validateSymbol(symbol)) {
+    if (validateSymbol(symbol) && validateDays(days)) {
       history = getPricesFromAlphaVantage(symbol,
           days > 100 ? OutputSize.Full : OutputSize.Compact);
+      storeInMongo(history);
       history.keepRelevantData(days);
+      history.setMessage("Request successful, please find data below.");
+    } else {
+      history.setMessage("Error in stock symbol or days ask for, please check and try again.");
     }
     return history;
+  }
+
+  private PriceHistory getPricesFromMongo(String symbol, double days) {
+    // check out Spring Data for Mongo stuff
+    return new PriceHistory();
+  }
+
+  private void storeInMongo(PriceHistory history) {
+    try {
+      MongoClient client = new MongoClient();
+      DB db = client.getDB("Prices");
+      DBCollection collection = db.getCollection(history.getMetadata().getSymbol());
+      collection.insert(history.toDBObject());
+      client.close();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 
   private PriceHistory getPricesFromAlphaVantage(String symbol, OutputSize size) {
@@ -51,6 +76,10 @@ public class PricesService{
 
   private boolean validateSymbol(String symbol) {
     return !(symbol.matches(".*\\d+.*") || symbol.length() > 6 || symbol.isEmpty());
+  }
+
+  private boolean validateDays(double days) {
+    return days > 0 && days < 15000 && days == (int)days;
   }
 }
 
