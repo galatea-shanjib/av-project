@@ -1,9 +1,6 @@
 package org.galatea.starter.service;
 
 import com.google.gson.JsonObject;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.MongoClient;
 import feign.Feign;
 import feign.Param;
 import feign.RequestLine;
@@ -16,6 +13,7 @@ import net.sf.aspect4log.Log;
 import net.sf.aspect4log.Log.Level;
 import org.galatea.starter.domain.price.OutputSize;
 import org.galatea.starter.domain.price.PriceHistory;
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Data
 @RequiredArgsConstructor
@@ -23,43 +21,45 @@ import org.galatea.starter.domain.price.PriceHistory;
 @Log(enterLevel = Level.INFO, exitLevel = Level.INFO)
 public class PricesService{
 
+  @Autowired
+  private PricesRepository repository;
   @NonNull
   private String apiUrl;
   @NonNull
   private String apiKey;
   @NonNull
   private String apiFunction;
-  private String mongoURL = "mongodb://localhost:27017";
 
   public PriceHistory getPrices(String symbol, double days) {
     PriceHistory history = new PriceHistory();
     if (validateSymbol(symbol) && validateDays(days)) {
-      history = getPricesFromAlphaVantage(symbol,
-          days > 100 ? OutputSize.Full : OutputSize.Compact);
-      storeInMongo(history);
-      history.keepRelevantData(days);
+      history = getPricesFromMongo(symbol);
+      if (history.equals(null) || history.getDailyPrices().toArray().length < days) {
+        history = getPricesFromAlphaVantage(symbol,
+            days > 100 ? OutputSize.Full : OutputSize.Compact);
+        storeInMongo(history);
+        history.setDebugMessage("gotten from AlphaVantage");
+      } else {
+        history.setDebugMessage("gotten from MongoDB");
+      }
       history.setMessage("Request successful, please find data below.");
+      history.keepRelevantData(days);
     } else {
       history.setMessage("Error in stock symbol or days ask for, please check and try again.");
     }
     return history;
   }
 
-  private PriceHistory getPricesFromMongo(String symbol, double days) {
-    // check out Spring Data for Mongo stuff
-    return new PriceHistory();
+  private PriceHistory getPricesFromMongo(String symbol) {
+    return repository.findByMetadata_Symbol(symbol);
   }
 
   private void storeInMongo(PriceHistory history) {
-    try {
-      MongoClient client = new MongoClient();
-      DB db = client.getDB("Prices");
-      DBCollection collection = db.getCollection(history.getMetadata().getSymbol());
-      collection.insert(history.toDBObject());
-      client.close();
-    } catch (Exception e) {
-      throw new RuntimeException(e);
+    PriceHistory test = repository.findByMetadata_Symbol(history.getMetadata().getSymbol());
+    if (test != null) {
+      repository.delete(history);
     }
+    repository.save(history);
   }
 
   private PriceHistory getPricesFromAlphaVantage(String symbol, OutputSize size) {

@@ -20,6 +20,7 @@ import org.galatea.starter.utils.PriceDailyDeserializer;
 public class PriceHistory {
 
   private String message;
+  private String debugMessage;
   private PriceMetadata metadata;
   private List<PriceDaily> dailyPrices;
 
@@ -35,15 +36,6 @@ public class PriceHistory {
   }
 
   public void keepRelevantData(double days) {
-    dailyPrices = dailyPrices.subList(0, (int)days - 1);
-  }
-
-  public DBObject toDBObject() {
-    return new BasicDBObject("message", message)
-        .append("metadata", new BasicDBObject("information", metadata.getInformation())
-            .append("symbol", metadata.getSymbol())
-            .append("lastRefreshed", metadata.getLastRefreshed())
-            .append("outputSize", metadata.getOutputSize())
-            .append("timeZone", metadata.getTimeZone()));
+    dailyPrices = dailyPrices.subList(0, (int)days);
   }
 }
