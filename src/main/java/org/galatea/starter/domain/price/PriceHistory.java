@@ -19,6 +19,7 @@ import org.galatea.starter.utils.PriceDailyDeserializer;
 @Data
 public class PriceHistory {
 
+  private String id;
   private String message;
   private String debugMessage;
   private PriceMetadata metadata;

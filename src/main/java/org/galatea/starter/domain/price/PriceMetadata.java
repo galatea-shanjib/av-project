@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 public class PriceMetadata {
 
   @SerializedName("1. Information")
-  public String information = "test";
+  public String information;
 
   @SerializedName("2. Symbol")
   public String symbol;

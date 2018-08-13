@@ -30,22 +30,29 @@ public class PricesService{
   @NonNull
   private String apiFunction;
 
+  /**
+   * Return the price history of the stock for the number of days asked for
+   * Check if we have it already in the database first
+   */
   public PriceHistory getPrices(String symbol, double days) {
     PriceHistory history = new PriceHistory();
     if (validateSymbol(symbol) && validateDays(days)) {
       history = getPricesFromMongo(symbol);
-      if (history.equals(null) || history.getDailyPrices().toArray().length < days) {
+      if (history == null || history.getDailyPrices().toArray().length <= days) {
+        if (history != null) {
+          deleteFromMongo(history);          // Delete copy from database to store new information
+        }
         history = getPricesFromAlphaVantage(symbol,
             days > 100 ? OutputSize.Full : OutputSize.Compact);
         storeInMongo(history);
-        history.setDebugMessage("gotten from AlphaVantage");
+        history.setDebugMessage("Gotten from AlphaVantage");
       } else {
-        history.setDebugMessage("gotten from MongoDB");
+        history.setDebugMessage("Gotten from MongoDB");
       }
       history.setMessage("Request successful, please find data below.");
       history.keepRelevantData(days);
     } else {
-      history.setMessage("Error in stock symbol or days ask for, please check and try again.");
+      history.setMessage("Error in stock symbol or days asked for, please check and try again.");
     }
     return history;
   }
@@ -55,11 +62,11 @@ public class PricesService{
   }
 
   private void storeInMongo(PriceHistory history) {
-    PriceHistory test = repository.findByMetadata_Symbol(history.getMetadata().getSymbol());
-    if (test != null) {
-      repository.delete(history);
-    }
     repository.save(history);
+  }
+
+  private void deleteFromMongo(PriceHistory history) {
+    repository.delete(history.getId());
   }
 
   private PriceHistory getPricesFromAlphaVantage(String symbol, OutputSize size) {
@@ -67,7 +74,8 @@ public class PricesService{
       AlphaVantage av = Feign.builder()
           .decoder(new GsonDecoder())
           .target(AlphaVantage.class, apiUrl);
-      JsonObject json = av.json(apiFunction, symbol, size.toString(), apiKey);
+      // AlphaVantage returns an error with capital Full/Compact for size
+      JsonObject json = av.json(apiFunction, symbol, size.toString().toLowerCase(), apiKey);
       return new PriceHistory(json);
     } catch (Exception e) {
       throw new RuntimeException(e);
