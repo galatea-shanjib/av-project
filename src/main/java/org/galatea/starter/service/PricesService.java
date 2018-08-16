@@ -1,10 +1,5 @@
 package org.galatea.starter.service;
 
-import com.google.gson.JsonObject;
-import feign.Feign;
-import feign.Param;
-import feign.RequestLine;
-import feign.gson.GsonDecoder;
 import lombok.Data;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -23,8 +18,8 @@ public class PricesService{
 
   @Autowired
   private PricesRepository repository;
-  @NonNull
-  private String apiUrl;
+  @Autowired
+  private AlphaVantage alphaVantage;
   @NonNull
   private String apiKey;
   @NonNull
@@ -38,7 +33,7 @@ public class PricesService{
     PriceHistory history = new PriceHistory();
     if (validateSymbol(symbol) && validateDays(days)) {
       history = getPricesFromMongo(symbol);
-      if (history == null || history.getDailyPrices().toArray().length <= days) {
+      if (history == null || history.getDailyPrices().size() <= days) {
         if (history != null) {
           deleteFromMongo(history);          // Delete copy from database to store new information
         }
@@ -71,12 +66,9 @@ public class PricesService{
 
   private PriceHistory getPricesFromAlphaVantage(String symbol, OutputSize size) {
     try {
-      AlphaVantage av = Feign.builder()
-          .decoder(new GsonDecoder())
-          .target(AlphaVantage.class, apiUrl);
       // AlphaVantage returns an error with capital Full/Compact for size
-      JsonObject json = av.json(apiFunction, symbol, size.toString().toLowerCase(), apiKey);
-      return new PriceHistory(json);
+      return new PriceHistory(alphaVantage
+          .json(apiFunction, symbol, size.toString().toLowerCase(), apiKey));
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -91,10 +83,3 @@ public class PricesService{
   }
 }
 
-interface AlphaVantage {
-  @RequestLine("GET /query?function={func}&symbol={sym}&outputsize={size}&apikey={key}")
-  JsonObject json(@Param("func") String func,
-      @Param("sym") String symbol,
-      @Param("size") String size,
-      @Param("key") String key);
-}

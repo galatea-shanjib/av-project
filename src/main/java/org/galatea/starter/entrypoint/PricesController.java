@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-public class PriceController extends BaseRestController {
+public class PricesController extends BaseRestController {
 
   @NonNull
   PricesService pricesService;

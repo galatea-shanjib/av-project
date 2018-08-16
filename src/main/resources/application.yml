@@ -52,6 +52,3 @@ prices:
    apiUrl: https://www.alphavantage.co
    apiKey: XBLEFGBKUO1U4EYG
    apiFunction: TIME_SERIES_DAILY
----
-mongo:
-   dbURL: test

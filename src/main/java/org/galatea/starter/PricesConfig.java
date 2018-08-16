@@ -10,13 +10,11 @@ public class PricesConfig {
 
   @Value("${prices.apiKey}")
   private String apiKey;
-  @Value("${prices.apiUrl}")
-  private String apiUrl;
   @Value("${prices.apiFunction}")
   private String apiFunction;
 
   @Bean
   public PricesService pricesService() {
-    return new PricesService(apiUrl, apiKey, apiFunction);
+    return new PricesService(apiKey, apiFunction);
   }
 }
