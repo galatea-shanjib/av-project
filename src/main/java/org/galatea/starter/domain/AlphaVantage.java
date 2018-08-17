@@ -1,4 +1,4 @@
-package org.galatea.starter.service;
+package org.galatea.starter.domain;
 
 import com.google.gson.JsonObject;
 import feign.Param;

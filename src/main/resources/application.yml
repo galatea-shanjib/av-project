@@ -9,6 +9,10 @@ spring:
       # http://www.h2database.com/html/tutorial.html#using_server
       url: jdbc:h2:mem:testtest
       driver-class-name: org.h2.Driver
+   data:
+      mongodb:
+         uri: mongodb://fuzeUser:galatea1@ds215502.mlab.com:15502
+         database: av-project
    jpa:
       hibernate:
          ddl-auto: update

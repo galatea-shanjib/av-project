@@ -2,7 +2,7 @@ package org.galatea.starter;
 
 import feign.Feign;
 import feign.gson.GsonDecoder;
-import org.galatea.starter.service.AlphaVantage;
+import org.galatea.starter.domain.AlphaVantage;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

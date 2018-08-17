@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.aspect4log.Log;
 import net.sf.aspect4log.Log.Level;
+import org.galatea.starter.domain.AlphaVantage;
 import org.galatea.starter.domain.price.OutputSize;
 import org.galatea.starter.domain.price.PriceHistory;
+import org.galatea.starter.domain.rpsy.PricesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Data
@@ -28,12 +30,13 @@ public class PricesService{
   /**
    * Return the price history of the stock for the number of days asked for
    * Check if we have it already in the database first
+   * If not pull from Alpha Vantage API and store in database
    */
   public PriceHistory getPrices(String symbol, double days) {
     PriceHistory history = new PriceHistory();
     if (validateSymbol(symbol) && validateDays(days)) {
       history = getPricesFromMongo(symbol);
-      if (history == null || history.getDailyPrices().size() <= days) {
+      if (history == null || history.getDailyPrices().size() < days) {
         if (history != null) {
           deleteFromMongo(history);          // Delete copy from database to store new information
         }

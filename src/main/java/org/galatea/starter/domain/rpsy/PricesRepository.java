@@ -1,4 +1,4 @@
-package org.galatea.starter.service;
+package org.galatea.starter.domain.rpsy;
 
 import org.galatea.starter.domain.price.PriceHistory;
 import org.springframework.data.mongodb.repository.MongoRepository;
