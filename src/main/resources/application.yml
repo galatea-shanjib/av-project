@@ -11,8 +11,12 @@ spring:
       driver-class-name: org.h2.Driver
    data:
       mongodb:
-         uri: mongodb://fuzeUser:galatea1@ds215502.mlab.com:15502
-         database: av-project
+         database: <db>
+         authentication-database: <auth db>
+         host: <host>
+         port: <port>
+         username: <username>
+         password: <password>
    jpa:
       hibernate:
          ddl-auto: update

@@ -4,15 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+
 import java.lang.reflect.Type;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.galatea.starter.utils.MetadataDeserializer;
-import org.galatea.starter.utils.PriceDailyDeserializer;
+import org.galatea.starter.utils.deserializers.MetadataDeserializer;
+import org.galatea.starter.utils.deserializers.PriceDailyDeserializer;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -25,6 +24,7 @@ public class PriceHistory {
   private PriceMetadata metadata;
   private List<PriceDaily> dailyPrices;
 
+  // Constructor using custom deserializers
   public PriceHistory(JsonObject json) {
     Type pricesListType = new TypeToken<List<PriceDaily>>(){}.getType();
     Gson gson = new GsonBuilder()

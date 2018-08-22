@@ -1,4 +1,4 @@
-package org.galatea.starter.utils;
+package org.galatea.starter.utils.deserializers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
@@ -12,12 +12,11 @@ import java.util.Map;
 import org.galatea.starter.domain.price.PriceDaily;
 
 public class PriceDailyDeserializer implements JsonDeserializer<List<PriceDaily>> {
-
   @Override
   public List<PriceDaily> deserialize(JsonElement je, Type type, JsonDeserializationContext jdc) {
     List<PriceDaily> list = new ArrayList<>();
     JsonObject price = je.getAsJsonObject().get("Time Series (Daily)").getAsJsonObject();
-
+    // Loop through each entry and add to list object
     for (Map.Entry<String, JsonElement> entry : price.entrySet()) {
       PriceDaily daily = new Gson().fromJson(entry.getValue(), PriceDaily.class);
       daily.setDate(entry.getKey());

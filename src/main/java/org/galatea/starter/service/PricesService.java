@@ -50,26 +50,31 @@ public class PricesService{
       history.setMessage("Request successful, please find data below.");
       history.keepRelevantData(days);
     } else {
+      log.error("Symbol or Days input invalid.");
       history.setMessage("Error in stock symbol or days asked for, please check and try again.");
     }
     return history;
   }
 
   private PriceHistory getPricesFromMongo(String symbol) {
+    log.info("Retrieving data from Mongo instance.");
     return repository.findByMetadata_Symbol(symbol);
   }
 
   private void storeInMongo(PriceHistory history) {
+    log.info("Storing data in Mongo instance.");
     repository.save(history);
   }
 
   private void deleteFromMongo(PriceHistory history) {
+    log.info("Deleting data from Mongo instance.");
     repository.delete(history.getId());
   }
 
   private PriceHistory getPricesFromAlphaVantage(String symbol, OutputSize size) {
     try {
       // AlphaVantage returns an error with capital Full/Compact for size
+      log.info("Getting data from Alpha Vantage API");
       return new PriceHistory(alphaVantage
           .json(apiFunction, symbol, size.toString().toLowerCase(), apiKey));
     } catch (Exception e) {
@@ -77,10 +82,12 @@ public class PricesService{
     }
   }
 
+  // If the symbol has a number, is too long, or is empty, return false
   private boolean validateSymbol(String symbol) {
     return !(symbol.matches(".*\\d+.*") || symbol.length() > 6 || symbol.isEmpty());
   }
 
+  // If the days are negative, greater than 20 years, or has a decimal, return false
   private boolean validateDays(double days) {
     return days > 0 && days < 15000 && days == (int)days;
   }

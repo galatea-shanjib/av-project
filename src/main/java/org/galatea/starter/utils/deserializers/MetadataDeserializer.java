@@ -1,4 +1,4 @@
-package org.galatea.starter.utils;
+package org.galatea.starter.utils.deserializers;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonDeserializationContext;
