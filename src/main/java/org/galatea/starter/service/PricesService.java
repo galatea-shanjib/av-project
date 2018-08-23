@@ -36,19 +36,38 @@ public class PricesService{
     PriceHistory history = new PriceHistory();
     if (validateSymbol(symbol) && validateDays(days)) {
       history = getPricesFromMongo(symbol);
+
       if (history == null || history.getDailyPrices().size() < days) {
-        if (history != null) {
-          deleteFromMongo(history);          // Delete copy from database to store new information
-        }
-        history = getPricesFromAlphaVantage(symbol,
+        PriceHistory avHistory = getPricesFromAlphaVantage(symbol,
             days > 100 ? OutputSize.Full : OutputSize.Compact);
-        storeInMongo(history);
-        history.setDebugMessage("Gotten from AlphaVantage");
+        if (avHistory.isNull()) {
+          log.error("Alpha Vantage did not return data.");
+          if (history == null) {
+            history = avHistory;
+          } else {
+            history.setDebugMessage("Gotten from MongoDB");
+          }
+        } else {
+          if (history != null) {
+            deleteFromMongo(history);          // Delete copy from database to store new information
+            storeInMongo(avHistory);
+          }
+          history = avHistory;
+          history.setDebugMessage("Gotten from AlphaVantage");
+        }
       } else {
         history.setDebugMessage("Gotten from MongoDB");
       }
-      history.setMessage("Request successful, please find data below.");
-      history.keepRelevantData(days);
+
+      if (history.isNull()) {
+        history.setMessage("Request unsucessful, error retrieving data.");
+      } else if (history.getDailyPrices().size() < days) {
+        history.setMessage("Error retrieving full data, please find partial data below.");
+      } else {
+        history.setMessage("Request successful, please find data below.");
+        history.keepRelevantData(days);
+      }
+
     } else {
       log.error("Symbol or Days input invalid.");
       history.setMessage("Error in stock symbol or days asked for, please check and try again.");

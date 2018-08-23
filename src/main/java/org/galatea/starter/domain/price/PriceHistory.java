@@ -36,6 +36,10 @@ public class PriceHistory {
     dailyPrices = gson.fromJson(json, pricesListType);
   }
 
+  public boolean isNull() {
+    return metadata == null || dailyPrices == null;
+  }
+
   public void keepRelevantData(double days) {
     dailyPrices = dailyPrices.subList(0, (int)days);
   }
